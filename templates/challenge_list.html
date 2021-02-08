@@ -1,13 +1,24 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>List of active Challenges</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-</body>
-</html>
+{% block content %}
+{% if logged_in %}
+    <h2>Your global rank: {{rank}}</h2>
+{% endif %}
+
+<h2>Active challenges</h2>
+
+<ol>
+    {% for cha in challenges %}
+    <li>
+        Challenge <a href="/challenges/{{cha.id}}">"{{cha.name}}"</a><br>
+        <ul>
+            {% if logged_in %}
+                <li>Your score: {{cha.my}}</li>
+            {% endif %}
+            <li>Best score: {{cha.best}}</li>
+        </ul>
+    </li>
+    {% endfor %}
+</ol>
+
+{% endblock %}

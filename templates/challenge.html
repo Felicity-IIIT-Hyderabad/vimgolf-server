@@ -1,26 +1,19 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Challenge page</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% block content %}
     <h1>{{title}}</h1>
     <p>{{desc}}</p>
     <div>
         <h2>Input text</h2>
-        <code>
-            {{intxt}}
-        </code>
+        {% if intxt %}
+            <code>
+                {{intxt}}
+            </code>
+        {% else %}
+            (no input text)
+        {% endif %}
     </div>
     <div>
-        <h2>Output text</h2>
-<!--        <code>-->
-            {{out}}
-<!--        </code>-->
+        <h2>Output Text</h2>
+        <pre class="prettyprint">{{out}}</pre>
     </div>
-</body>
-</html>
+{% endblock content %}

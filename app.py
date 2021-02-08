@@ -35,7 +35,7 @@ def setup():
         CHALLENGE_DATA[challenge_idx] = data
 
 
-@app.route("/")
+@app.route("/test")
 def healthcheck():
     return "Hello World"
 
@@ -75,9 +75,19 @@ def submit():
     print(request)
 
 
+@app.route("/")
 @app.route("/view")
 def view():
-    return render_template("challenge_list.html")
+    challenges = []
+    for challenge_id, c_data in CHALLENGE_DATA.items():
+        data = {}
+        data["name"] = c_data["title"]
+        data["id"] = challenge_id
+        data["best"] = 100
+        challenges.append(data)
+
+    return render_template("challenge_list.html", title="List of Active Challenges", challenges=challenges,
+                           logged_in=False)
 
 
 @app.route("/list")
@@ -93,7 +103,13 @@ def get_leaderboard(challenge_id):
 
 @app.route("/leaderboard")
 def leaderboard():
-    return render_template("leaderboard.html")
+    leaders = [{"rank": 1, "username": "sigma_g", "score": 100, 'scores': [-100]},
+               {"rank": 2, "username": "yoogottamk", "score": -100, "scores": [-100]}]
+    cha_ids = list(range(total_challenges))
+    return render_template("leaderboard.html", leaders=leaders, title="Global leaderboard", cha_ids=cha_ids)
 
 
 setup()
+
+if __name__ == "__main__":
+    app.run(debug=True)

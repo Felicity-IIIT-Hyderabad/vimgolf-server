@@ -1,13 +1,31 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Overall Leaderboard</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-</body>
-</html>
+{% block content %}
+<h1>Global Leaderboard</h1>
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+        <tr>
+            <th scope="col">rank</th>
+            <th scope="col">username</th>
+            <th scope="col">total score</th>
+            {% for id in cha_ids %}
+            <th scope="col">problem{{id}}</th>
+            {% endfor %}
+        </tr>
+        </thead>
+        <tbody>
+        {% for leader in leaders %}
+        <tr>
+            <th scope="row">{{leader.rank}}</th>
+            <td>{{leader.username}}</td>
+            <td>{{leader.score}}</td>
+            {% for score in leader.scores %}
+                <td>{{score}}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
