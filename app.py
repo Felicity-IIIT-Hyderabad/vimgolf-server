@@ -50,18 +50,30 @@ def validate_challenge_id(func):
     return wrapper
 
 
+# in theory, I should be able to get a jwt token to work
+# so that it can be used to submit via the CLI
+def get_key(name, email):
+    return f"key-{name}-{email}"
+
+
+def setup_gui_route(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        filename, args = func(*args, **kwargs)
+        name = "Gaurang"  # request.headers["X-Fname"]
+        email = "gaurang.tandon@students.iiit.ac.in"  # request.headers["X-Email"]
+        return render_template(filename, **args, name=name, apikey=get_key(name, email), logged_in=True)
+
+    return wrapper
+
+
 @app.route("/challenges/<int:challenge_id>")
 @validate_challenge_id
+@setup_gui_route
 def challenge(challenge_id):
     data = CHALLENGE_DATA[challenge_id]
 
-    # how to display monospaced text in jinja?
-    # keys = ["out", "desc", "in"]
-    # for key in keys:
-    #     data[key] = re.sub("\n", "<br>", data[key])
-    # data["out"] = f"<code>\n{data['out']}</code>"
-
-    return render_template("challenge.html", intxt=data["in"], out=data["out"], title=data["title"], desc=data["desc"])
+    return "challenge.html", {"intxt": data["in"], "out": data["out"], "title": data["title"], "desc": data["desc"]}
 
 
 @app.route("/challenges/<int:challenge_id>.json")
@@ -77,17 +89,15 @@ def submit():
 
 @app.route("/")
 @app.route("/view")
+@setup_gui_route
 def view():
     challenges = []
+
     for challenge_id, c_data in CHALLENGE_DATA.items():
-        data = {}
-        data["name"] = c_data["title"]
-        data["id"] = challenge_id
-        data["best"] = 100
+        data = {"name": c_data["title"], "id": challenge_id, "best": 100}
         challenges.append(data)
 
-    return render_template("challenge_list.html", title="List of Active Challenges", challenges=challenges,
-                           logged_in=False)
+    return "challenge_list.html", {"title": "List of Active Challenges", "challenges": challenges, "logged_in": False}
 
 
 @app.route("/list")
@@ -102,6 +112,7 @@ def get_leaderboard(challenge_id):
 
 
 @app.route("/leaderboard")
+@setup_gui_route
 def leaderboard():
     leaders = [{"rank": 1, "username": "sigma_g", "score": 100, 'scores': [-100]},
                {"rank": 2, "username": "yoogottamk", "score": -100, "scores": [-100]}]
