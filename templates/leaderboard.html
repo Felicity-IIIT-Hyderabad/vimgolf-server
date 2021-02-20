@@ -8,6 +8,7 @@
         <tr>
             <th scope="col">rank</th>
             <th scope="col">username</th>
+            <th scope="col">questions solved</th>
             <th scope="col">total score</th>
             {% for id in cha_ids %}
             <th scope="col">problem{{id}}</th>
@@ -19,9 +20,10 @@
         <tr>
             <th scope="row">{{leader.rank}}</th>
             <td>{{leader.username}}</td>
+            <td>{{leader.solved}}</td>
             <td>{{leader.score}}</td>
             {% for score in leader.scores %}
-                <td>{{score}}</td>
+            <td>{{score}}</td>
             {% endfor %}
         </tr>
         {% endfor %}

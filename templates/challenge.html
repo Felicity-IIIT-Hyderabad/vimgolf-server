@@ -1,19 +1,19 @@
 {% extends 'base.html' %}
 {% block content %}
-    <h1>{{title}}</h1>
-    <p>{{desc}}</p>
-    <div>
-        <h2>Input text</h2>
-        {% if intxt %}
-            <code>
-                {{intxt}}
-            </code>
-        {% else %}
-            (no input text)
-        {% endif %}
-    </div>
-    <div>
-        <h2>Output Text</h2>
-        <pre class="prettyprint">{{out}}</pre>
-    </div>
+<h1>{{title}}</h1>
+<p>{{desc}}</p>
+<div>
+    <h2>Input text</h2>
+    {% if intxt %}
+    <code>
+        {{intxt}}
+    </code>
+    {% else %}
+    (no input text)
+    {% endif %}
+</div>
+<div>
+    <h2>Output Text</h2>
+    <pre class="prettyprint">{{out}}</pre>
+</div>
 {% endblock content %}
