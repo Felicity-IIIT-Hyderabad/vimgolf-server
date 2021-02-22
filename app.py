@@ -73,22 +73,22 @@ def get_key(name, email):
     return f"key-{name}-{email}"
 
 
-def get_name_email(req):
-    name_key = "X-Fname"
-    email_key = "X-Email"
+def get_name_email_username(req):
+    return "gaurang", "g@iiit.ac.in", "gaurang"
+    name_key = "x-fname"
+    email_key = "x-email"
+    username_key = "x-username"
     heads = req.headers
     if name_key not in heads or email_key not in heads:
-        return None, None
-    return heads[name_key], heads[email_key]
+        return None, None, None
+    return heads[name_key], heads[email_key], heads[username_key]
 
 
 def setup_gui_route(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         filename, args = func(*args, **kwargs)
-        name = "Gaurang"
-        email = "gaurang.tandon@students.iiit.ac.in"
-        # name, email = get_name_email(request)
+        name, email, _username = get_name_email_username(request)
         return render_template(filename, **args, name=name, apikey=get_key(name, email), logged_in=True)
 
     return wrapper
@@ -130,7 +130,7 @@ def get_score_from_raw_keys(raw_keys):
 @app.route("/submit/<int:challenge_id>", methods=["POST"])
 @validate_challenge_id
 def submit(challenge_id):
-    name, email = get_name_email(request)
+    name, email, username = get_name_email_username(request)
 
     # this shouldn't really happen
     if name is None:
@@ -154,7 +154,7 @@ def submit(challenge_id):
         db.session.delete(exists)
 
     timestamp = datetime.datetime.now()
-    new_score = Score(useralias=name, useremail=email, challenge_code=challenge_id, keystrokes=score_value,
+    new_score = Score(useralias=username, useremail=email, challenge_code=challenge_id, keystrokes=score_value,
                       timestamp=timestamp)
     db.session.add(new_score)
     db.session.commit()
@@ -166,13 +166,16 @@ def submit(challenge_id):
 @app.route("/view")
 @setup_gui_route
 def view():
+    name, email, username = get_name_email_username(request)
+    global_rank, _scores = get_global_leaderboard_data(username)
     challenges = []
 
     for challenge_id, c_data in CHALLENGE_DATA.items():
         data = {"name": c_data["title"], "id": challenge_id, "best": 100}
         challenges.append(data)
 
-    return "challenge_list.html", {"title": "List of Active Challenges", "challenges": challenges}
+    return "challenge_list.html", {"title": "List of Active Challenges", "challenges": challenges,
+                                   "global_rank": str(global_rank)}
 
 
 @app.route("/list")
@@ -192,14 +195,15 @@ def get_challenge_leaderboard_data(challenge_code):
     return [{"alias": score.useralias, "score": score.keystrokes} for score in scores]
 
 
-def get_global_leaderboard_data(prob_count):
+def get_global_leaderboard_data(specific_alias=None):
     scores = Score.query.all()
     countsolved = defaultdict(int)
     totalkeys = defaultdict(int)
     lasttimestamp = defaultdict(lambda: datetime.datetime(1970, 1, 1))
     usernames = set([])
 
-    score_dict = defaultdict(lambda: ["-" for _ in range(prob_count)])
+    default_score_gen = lambda: ["-" for _ in range(total_challenges)]
+    score_dict = defaultdict(default_score_gen)
 
     for score in scores:
         alias = score.useralias
@@ -217,8 +221,13 @@ def get_global_leaderboard_data(prob_count):
     leaders = []
     for rank, sorted_item in enumerate(score_list):
         alias = sorted_item[1]
+        if specific_alias == alias:
+            return rank, score_dict[alias]
         leaders.append({"rank": rank, "username": alias, "score": totalkeys[alias], "solved": countsolved[alias],
                         "timestamp": lasttimestamp[alias].strftime("%d %B %Y %I:%M%p"), "scores": score_dict[alias]})
+
+    if specific_alias is not None:
+        return len(score_list), default_score_gen()
 
     return leaders
 
