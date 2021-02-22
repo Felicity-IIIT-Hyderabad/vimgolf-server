@@ -10,6 +10,7 @@
             <th scope="col">username</th>
             <th scope="col">questions solved</th>
             <th scope="col">total score</th>
+            <th scope="col">last date</th>
             {% for id in cha_ids %}
             <th scope="col">problem{{id}}</th>
             {% endfor %}
@@ -22,6 +23,7 @@
             <td>{{leader.username}}</td>
             <td>{{leader.solved}}</td>
             <td>{{leader.score}}</td>
+            <td>{{leader.timestamp}}</td>
             {% for score in leader.scores %}
             <td>{{score}}</td>
             {% endfor %}

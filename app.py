@@ -1,3 +1,6 @@
+import datetime
+from datetime import time
+
 from flask import Flask, request, render_template, abort
 import functools
 from os import listdir, getenv
@@ -51,7 +54,7 @@ def healthcheck():
 
 
 def is_valid_challenge_id(challenge_id):
-    return challenge_id >= total_challenges or challenge_id < 0
+    return challenge_id is not None and (int(challenge_id) < total_challenges or int(challenge_id) >= 0)
 
 
 def validate_challenge_id(func):
@@ -124,36 +127,39 @@ def get_score_from_raw_keys(raw_keys):
 # give yoogottam a temporary directory containing the submitted file
 # he will pick up in and out from challenges directory
 # yoogottam will give me a partial score (how many files gave `diff -w` exit code zero)
-@app.route("/submit", methods=["POST"])
-def submit():
+@app.route("/submit/<int:challenge_id>", methods=["POST"])
+@validate_challenge_id
+def submit(challenge_id):
     name, email = get_name_email(request)
 
     # this shouldn't really happen
     if name is None:
         abort(403, "User not logged in")
 
-    raw_keys = request.args.get("entry")
-    challenge_code = request.args.get('challenge_id')
+    raw_keys = request.data
+    if raw_keys is None:
+        abort(403, "No raw keys supplied")
 
-    if not is_valid_challenge_id(challenge_code):
-        abort(403, "Invalid challenge id")
-
-    result = test_keystrokes(challenge_code, raw_keys)
+    result = test_keystrokes(challenge_id, raw_keys)
 
     if not result:
         abort(403, "Invalid keystroke for given challenge id")
 
     score_value = get_score_from_raw_keys(raw_keys)
-    exists = Score.query.filter(Score.email == email and Score.challenge_code == challenge_code).first()
+    exists = Score.query.filter(Score.useremail == email and Score.challenge_code == challenge_id).first()
 
     if exists:
+        if exists.keystrokes <= score_value:
+            abort(403, "Same or better score already exists")
         db.session.delete(exists)
 
-    new_score = Score(useralias=name, useremail=email, challenge_code=challenge_code, keystrokes=score_value)
+    timestamp = datetime.datetime.now()
+    new_score = Score(useralias=name, useremail=email, challenge_code=challenge_id, keystrokes=score_value,
+                      timestamp=timestamp)
     db.session.add(new_score)
     db.session.commit()
 
-    return 200
+    return "Success"
 
 
 @app.route("/")
@@ -190,22 +196,26 @@ def get_global_leaderboard_data():
     scores = Score.query.all()
     countsolved = defaultdict(int)
     totalkeys = defaultdict(int)
+    lasttimestamp = defaultdict(int)
     usernames = set([])
 
     for score in scores:
-        countsolved[score.useralias] += 1
-        totalkeys[score.useralias] += score.keystrokes
-        usernames.add(score.useralias)
+        alias = score.useralias
+        countsolved[alias] += 1
+        totalkeys[alias] += score.keystrokes
+        lasttimestamp[alias] = max(lasttimestamp[alias], score.timestamp)
+        usernames.add(alias)
 
     usernames = list(usernames)
-    score_list = [((-countsolved[alias], totalkeys[alias]), alias) for alias in usernames]
+    score_list = [((-countsolved[alias], totalkeys[alias], lasttimestamp[alias]), alias) for alias in usernames]
 
     score_list = sorted(score_list, key=itemgetter(0))
 
     leaders = []
     for rank, sorted_item in enumerate(score_list):
         alias = sorted_item[1]
-        leaders.append({"rank": rank, "username": alias, "score": totalkeys[alias], "solved": countsolved[alias]})
+        leaders.append({"rank": rank, "username": alias, "score": totalkeys[alias], "solved": countsolved[alias],
+                        "last_submitted": lasttimestamp[alias]})
 
     return leaders
 
@@ -215,7 +225,7 @@ def get_global_leaderboard_data():
 def leaderboard():
     cha_ids = list(range(total_challenges))
     leaders = get_global_leaderboard_data()
-    return render_template("leaderboard.html", leaders=leaders, title="Global leaderboard", cha_ids=cha_ids)
+    return "leaderboard.html", {"leaders": leaders, "title": "Global leaderboard", "cha_ids": cha_ids}
 
 
 init_setup()
