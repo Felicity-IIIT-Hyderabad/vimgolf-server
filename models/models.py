@@ -7,7 +7,7 @@ class Score(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     keystrokes = db.Column(db.Integer)
     useremail = db.Column(db.String)
-    challenge_code = db.Column(db.String)
+    challenge_code = db.Column(db.Integer)
     useralias = db.Column(db.String)
     timestamp = db.Column(db.DateTime)
 

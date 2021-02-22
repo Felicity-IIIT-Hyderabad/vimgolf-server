@@ -192,18 +192,21 @@ def get_challenge_leaderboard_data(challenge_code):
     return [{"alias": score.useralias, "score": score.keystrokes} for score in scores]
 
 
-def get_global_leaderboard_data():
+def get_global_leaderboard_data(prob_count):
     scores = Score.query.all()
     countsolved = defaultdict(int)
     totalkeys = defaultdict(int)
-    lasttimestamp = defaultdict(int)
+    lasttimestamp = defaultdict(lambda: datetime.datetime(1970, 1, 1))
     usernames = set([])
+
+    score_dict = defaultdict(lambda: ["-" for _ in range(prob_count)])
 
     for score in scores:
         alias = score.useralias
         countsolved[alias] += 1
         totalkeys[alias] += score.keystrokes
         lasttimestamp[alias] = max(lasttimestamp[alias], score.timestamp)
+        score_dict[alias][score.challenge_code] = str(score.keystrokes)
         usernames.add(alias)
 
     usernames = list(usernames)
@@ -215,7 +218,7 @@ def get_global_leaderboard_data():
     for rank, sorted_item in enumerate(score_list):
         alias = sorted_item[1]
         leaders.append({"rank": rank, "username": alias, "score": totalkeys[alias], "solved": countsolved[alias],
-                        "last_submitted": lasttimestamp[alias]})
+                        "timestamp": lasttimestamp[alias].strftime("%d %B %Y %I:%M%p"), "scores": score_dict[alias]})
 
     return leaders
 
@@ -224,7 +227,7 @@ def get_global_leaderboard_data():
 @setup_gui_route
 def leaderboard():
     cha_ids = list(range(total_challenges))
-    leaders = get_global_leaderboard_data()
+    leaders = get_global_leaderboard_data(total_challenges)
     return "leaderboard.html", {"leaders": leaders, "title": "Global leaderboard", "cha_ids": cha_ids}
 
 
