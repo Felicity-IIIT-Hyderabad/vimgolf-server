@@ -5,11 +5,11 @@ from flask import Flask, request, render_template, abort
 import functools
 from os import listdir, getenv
 import json
-from server.models.orm import db
-from server.models.models import Score
+from vimgolf.models.orm import db
+from vimgolf.models.models import Score
 from collections import defaultdict
 from operator import itemgetter
-from server.keys import get_keycode_repr, parse_keycodes, IGNORED_KEYSTROKES
+from vimgolf.keys import get_keycode_repr, parse_keycodes, IGNORED_KEYSTROKES
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = getenv(

@@ -1,4 +1,4 @@
-from server.models.orm import db
+from vimgolf.models.orm import db
 
 
 class Score(db.Model):
