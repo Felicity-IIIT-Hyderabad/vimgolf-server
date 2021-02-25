@@ -136,21 +136,28 @@ def submit(challenge_id):
     if name is None:
         abort(403, "User not logged in")
 
-    raw_keys = request.data
-    if raw_keys is None:
-        abort(403, "No raw keys supplied")
+    if "entry" not in request.form or "apikey" not in request.form:
+        return "Provide entry and apikey", 403
+
+    raw_keys = request.form["entry"].encode("utf-8")
+    apikey = request.form["apikey"]
+    # TODO: apikey validation
+
+    if not raw_keys:
+        return "No raw keys supplied", 403
 
     result = test_keystrokes(challenge_id, raw_keys)
 
     if not result:
-        abort(403, "Invalid keystroke for given challenge id")
+        return "Invalid keystroke for given challenge id", 403
 
     score_value = get_score_from_raw_keys(raw_keys)
     exists = Score.query.filter(Score.useremail == email and Score.challenge_code == challenge_id).first()
 
     if exists:
         if exists.keystrokes <= score_value:
-            abort(403, "Same or better score already exists")
+            # content not modified
+            return "Same or better score already exists", 304
         db.session.delete(exists)
 
     timestamp = datetime.datetime.now()
@@ -159,7 +166,7 @@ def submit(challenge_id):
     db.session.add(new_score)
     db.session.commit()
 
-    return "Success"
+    return "Sucess", 200
 
 
 @app.route("/")
