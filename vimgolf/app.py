@@ -1,15 +1,18 @@
+from distutils.dir_util import copy_tree
 import datetime
-from datetime import time
-
-from flask import Flask, request, render_template, abort
 import functools
-from os import listdir, getenv
 import json
-from vimgolf.models.orm import db
-from vimgolf.models.models import Score
 from collections import defaultdict
 from operator import itemgetter
-from vimgolf.keys import get_keycode_repr, parse_keycodes, IGNORED_KEYSTROKES
+from os import getenv, listdir
+from tempfile import mkdtemp
+
+from flask import Flask, abort, render_template, request
+
+from vimgolf.keys import IGNORED_KEYSTROKES, parse_keycodes
+from vimgolf.models.models import Score
+from vimgolf.models.orm import db
+from vimgolf.utils import docker_init, get_scores
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = getenv(
@@ -24,6 +27,8 @@ CHALLENGE_PATH = "challenges/"
 NUM_FILES_PER_CHALLENGE = 3  # in, out, desc
 CHALLENGE_DATA = {}
 
+d = docker_init()
+
 
 def init_setup():
     global total_challenges
@@ -34,7 +39,7 @@ def init_setup():
         PREF = f"{CHALLENGE_PATH}/{challenge_idx}"
 
         file_names = listdir(PREF)
-        assert (len(file_names) % NUM_FILES_PER_CHALLENGE == 0)
+        assert len(file_names) % NUM_FILES_PER_CHALLENGE == 0
 
         with open(f"{PREF}/0.in") as f:
             data["in"] = f.read()
@@ -54,7 +59,9 @@ def healthcheck():
 
 
 def is_valid_challenge_id(challenge_id):
-    return challenge_id is not None and (int(challenge_id) < total_challenges or int(challenge_id) >= 0)
+    return challenge_id is not None and (
+        int(challenge_id) < total_challenges or int(challenge_id) >= 0
+    )
 
 
 def validate_challenge_id(func):
@@ -94,7 +101,12 @@ def setup_gui_route(func):
 def challenge(challenge_id):
     data = CHALLENGE_DATA[challenge_id]
 
-    return "challenge.html", {"intxt": data["in"], "out": data["out"], "title": data["title"], "desc": data["desc"]}
+    return "challenge.html", {
+        "intxt": data["in"],
+        "out": data["out"],
+        "title": data["title"],
+        "desc": data["desc"],
+    }
 
 
 @app.route("/challenges/<int:challenge_id>.json")
@@ -104,7 +116,18 @@ def challenge_two(challenge_id):
 
 
 def test_keystrokes(challenge_id, keystrokestring):
-    return True
+    global d
+
+    tmpdir = mkdtemp()
+    challenge_dir = f"{CHALLENGE_PATH}/{challenge_id}"
+    copy_tree(challenge_dir, tmpdir)
+
+    with open(f"{tmpdir}/solve", "wb") as solution:
+        solution.write(keystrokestring)
+
+    (corr, wrong), logs = get_scores(d, tmpdir)
+
+    return corr > 0
 
 
 def get_score_from_raw_keys(raw_keys):
@@ -143,7 +166,9 @@ def submit(challenge_id):
         return "Invalid keystroke for given challenge id", 403
 
     score_value = get_score_from_raw_keys(raw_keys)
-    exists = Score.query.filter(Score.useremail == email and Score.challenge_code == challenge_id).first()
+    exists = Score.query.filter(
+        Score.useremail == email and Score.challenge_code == challenge_id
+    ).first()
 
     if exists:
         if exists.keystrokes <= score_value:
@@ -152,8 +177,13 @@ def submit(challenge_id):
         db.session.delete(exists)
 
     timestamp = datetime.datetime.now()
-    new_score = Score(useralias=username, useremail=email, challenge_code=challenge_id, keystrokes=score_value,
-                      timestamp=timestamp)
+    new_score = Score(
+        useralias=username,
+        useremail=email,
+        challenge_code=challenge_id,
+        keystrokes=score_value,
+        timestamp=timestamp,
+    )
     db.session.add(new_score)
     db.session.commit()
 
@@ -172,8 +202,11 @@ def view():
         data = {"name": c_data["title"], "id": challenge_id, "best": 100}
         challenges.append(data)
 
-    return "challenge_list.html", {"title": "List of Active Challenges", "challenges": challenges,
-                                   "global_rank": str(global_rank)}
+    return "challenge_list.html", {
+        "title": "List of Active Challenges",
+        "challenges": challenges,
+        "global_rank": str(global_rank),
+    }
 
 
 @app.route("/list")
@@ -212,7 +245,10 @@ def get_global_leaderboard_data(specific_alias=None):
         usernames.add(alias)
 
     usernames = list(usernames)
-    score_list = [((-countsolved[alias], totalkeys[alias], lasttimestamp[alias]), alias) for alias in usernames]
+    score_list = [
+        ((-countsolved[alias], totalkeys[alias], lasttimestamp[alias]), alias)
+        for alias in usernames
+    ]
 
     score_list = sorted(score_list, key=itemgetter(0))
 
@@ -221,8 +257,16 @@ def get_global_leaderboard_data(specific_alias=None):
         alias = sorted_item[1]
         if specific_alias == alias:
             return rank, score_dict[alias]
-        leaders.append({"rank": rank, "username": alias, "score": totalkeys[alias], "solved": countsolved[alias],
-                        "timestamp": lasttimestamp[alias].strftime("%d %B %Y %I:%M%p"), "scores": score_dict[alias]})
+        leaders.append(
+            {
+                "rank": rank,
+                "username": alias,
+                "score": totalkeys[alias],
+                "solved": countsolved[alias],
+                "timestamp": lasttimestamp[alias].strftime("%d %B %Y %I:%M%p"),
+                "scores": score_dict[alias],
+            }
+        )
 
     if specific_alias is not None:
         return len(score_list), default_score_gen()
@@ -235,7 +279,11 @@ def get_global_leaderboard_data(specific_alias=None):
 def leaderboard():
     cha_ids = list(range(total_challenges))
     leaders = get_global_leaderboard_data()
-    return "leaderboard.html", {"leaders": leaders, "title": "Global leaderboard", "cha_ids": cha_ids}
+    return "leaderboard.html", {
+        "leaders": leaders,
+        "title": "Global leaderboard",
+        "cha_ids": cha_ids,
+    }
 
 
 @app.route("/apikey")
