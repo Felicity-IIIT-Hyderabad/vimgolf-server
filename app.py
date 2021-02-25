@@ -36,11 +36,11 @@ def init_setup():
         data = {}
         PREF = f"{CHALLENGE_PATH}{challenge_idx}"
 
-        with open(f"{PREF}.in") as f:
+        with open(f"{PREF}/0.in") as f:
             data["in"] = f.read()
-        with open(f"{PREF}.out") as f:
+        with open(f"{PREF}/0.out") as f:
             data["out"] = f.read()
-        with open(f"{PREF}.desc") as f:
+        with open(f"{PREF}/0.desc") as f:
             lines = f.readlines()
             data["title"] = lines[0].strip()
             data["desc"] = "\n".join(lines[1:]).strip()
@@ -236,7 +236,7 @@ def get_global_leaderboard_data(specific_alias=None):
 @setup_gui_route
 def leaderboard():
     cha_ids = list(range(total_challenges))
-    leaders = get_global_leaderboard_data(total_challenges)
+    leaders = get_global_leaderboard_data()
     return "leaderboard.html", {"leaders": leaders, "title": "Global leaderboard", "cha_ids": cha_ids}
 
 
