@@ -67,12 +67,6 @@ def validate_challenge_id(func):
     return wrapper
 
 
-# in theory, I should be able to get a jwt token to work
-# so that it can be used to submit via the CLI
-def get_key(name, email):
-    return f"key-{name}-{email}"
-
-
 def get_name_email_username(req):
     return "gaurang", "g@iiit.ac.in", "gaurang"
     name_key = "x-fname"
@@ -89,7 +83,7 @@ def setup_gui_route(func):
     def wrapper(*args, **kwargs):
         filename, args = func(*args, **kwargs)
         name, email, _username = get_name_email_username(request)
-        return render_template(filename, **args, name=name, apikey=get_key(name, email), logged_in=True)
+        return render_template(filename, **args, name=name, logged_in=True)
 
     return wrapper
 
@@ -133,15 +127,12 @@ def submit(challenge_id):
     name, email, username = get_name_email_username(request)
 
     # this shouldn't really happen
-    if name is None:
-        abort(403, "User not logged in")
+    assert (name is not None)
 
-    if "entry" not in request.form or "apikey" not in request.form:
-        return "Provide entry and apikey", 403
+    if "entry" not in request.form:
+        return "Provide entry", 403
 
     raw_keys = request.form["entry"].encode("utf-8")
-    apikey = request.form["apikey"]
-    # TODO: apikey validation
 
     if not raw_keys:
         return "No raw keys supplied", 403
@@ -245,6 +236,15 @@ def leaderboard():
     cha_ids = list(range(total_challenges))
     leaders = get_global_leaderboard_data()
     return "leaderboard.html", {"leaders": leaders, "title": "Global leaderboard", "cha_ids": cha_ids}
+
+
+@app.route("/apikey")
+@setup_gui_route
+def apikey():
+    authorization_key = "authorization"
+    token = request.headers[authorization_key]
+
+    return "apikey.html", {"apikey": token}
 
 
 init_setup()

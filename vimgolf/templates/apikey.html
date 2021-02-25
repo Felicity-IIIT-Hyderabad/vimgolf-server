@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<button class="apikey" data-msg="{{apikey}}">Click to copy your apikey</button><br>
+If your browser doesn't support copy, open browser console and copy from there
+<script>
+    function handler() {
+        const btn = document.querySelector(".apikey");
+        let apikey = btn.dataset.msg;
+        btn.addEventListener("click", function () {
+            window.navigator.clipboard.writeText(apikey);
+        });
+        console.log(apikey);
+    }
+
+    if (document.readyState === "complete") {
+        handler();
+    } else {
+        window.addEventListener("load", handler);
+    }
+</script>
+{% endblock %}
