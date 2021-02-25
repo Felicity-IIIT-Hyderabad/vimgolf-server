@@ -28,13 +28,13 @@ CHALLENGE_DATA = {}
 def init_setup():
     global total_challenges
     challenge_files = listdir(CHALLENGE_PATH)
-    file_count = len(challenge_files)
-    assert (file_count % NUM_FILES_PER_CHALLENGE == 0)
-    total_challenges = file_count // NUM_FILES_PER_CHALLENGE
 
-    for challenge_idx in range(total_challenges):
+    for challenge_idx, _idx in enumerate(challenge_files):
         data = {}
-        PREF = f"{CHALLENGE_PATH}{challenge_idx}"
+        PREF = f"{CHALLENGE_PATH}/{challenge_idx}"
+
+        file_names = listdir(PREF)
+        assert (len(file_names) % NUM_FILES_PER_CHALLENGE == 0)
 
         with open(f"{PREF}/0.in") as f:
             data["in"] = f.read()
