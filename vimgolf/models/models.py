@@ -6,9 +6,9 @@ class Score(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     keystrokes = db.Column(db.Integer)
-    useremail = db.Column(db.String)
+    useremail = db.Column(db.String(64))
     challenge_code = db.Column(db.Integer)
-    useralias = db.Column(db.String)
+    useralias = db.Column(db.String(64))
     timestamp = db.Column(db.DateTime)
 
     # @staticmethod

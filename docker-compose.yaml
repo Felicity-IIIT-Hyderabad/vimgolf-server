@@ -21,7 +21,10 @@ services:
     build:
       context: .
     environment:
-      - DOCKER_HOST=tcp://vimgolf-db:2375
+      - DOCKER_HOST=tcp://vimgolf-docker:2375
+      - SQLALCHEMY_DATABASE_URI=mysql+pymysql://vimgolf:${DB_PASSWORD}@vimgolf-db/vimgolf
+    ports:
+      - "4242:4242"
     volumes:
       - vimgolf-submissions:/tmp
     depends_on:
@@ -29,3 +32,4 @@ services:
 volumes:
   vimgolf-submissions:
     external: true
+  vimgolf-db-data:
