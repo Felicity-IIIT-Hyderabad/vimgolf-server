@@ -75,22 +75,22 @@ def validate_challenge_id(func):
 
 
 def get_name_email_username(req):
-    return "gaurang", "g@iiit.ac.in", "gaurang"
-    name_key = "x-fname"
-    email_key = "x-email"
-    username_key = "x-username"
     heads = req.headers
-    if name_key not in heads or email_key not in heads:
-        return None, None, None
-    return heads[name_key], heads[email_key], heads[username_key]
+    return (
+        heads["x-fname"] + heads["x-lname"],
+        heads["x-email"],
+        heads["x-username"],
+    )
 
 
 def setup_gui_route(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         filename, args = func(*args, **kwargs)
-        name, email, _username = get_name_email_username(request)
-        return render_template(filename, **args, name=name, logged_in=True)
+        name, email, username = get_name_email_username(request)
+        return render_template(
+            filename, **args, name=name, email=email, username=username, logged_in=True
+        )
 
     return wrapper
 
@@ -150,7 +150,7 @@ def submit(challenge_id):
     name, email, username = get_name_email_username(request)
 
     # this shouldn't really happen
-    assert (name is not None)
+    assert name is not None
 
     if "entry" not in request.form:
         return "Provide entry", 403
