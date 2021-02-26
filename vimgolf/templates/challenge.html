@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>{{title}}</h1>
-<p>{{desc}}</p>
+<p>{{desc | safe}}</p>
 <div>
     <h2>Input text</h2>
     {% if intxt %}
