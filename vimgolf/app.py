@@ -213,7 +213,6 @@ def before_request():
         return redirect(url_for("give_error"))
 
 
-@app.route("/404")
 @setup_gui_route
 def give_error():
     return "404.html", {}
