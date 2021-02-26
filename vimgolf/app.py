@@ -288,10 +288,12 @@ def get_best_score(challenge_id, alias=None):
     if alias:
         with open("y", "a") as f:
             f.write(f"!{alias} {challenge_id}\n")
-            res = Score.query.filter(Score.challenge_code == challenge_id and Score.useralias == alias).first()
+            res = Score.query.filter(Score.challenge_code == challenge_id and Score.useralias == alias).all()
+            for uu in res:
+                f.write(f"{uu}\n")
             f.write(f"!{alias} {challenge_id}\n")
         if res:
-            return res.keystrokes
+            return res[0].keystrokes
         else:
             return -1
 
