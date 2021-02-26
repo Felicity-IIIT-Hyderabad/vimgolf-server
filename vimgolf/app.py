@@ -14,6 +14,9 @@ from vimgolf.models.models import Score
 from vimgolf.models.orm import db
 from vimgolf.utils import docker_init, get_scores
 
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = getenv(
     "SQLALCHEMY_DATABASE_URI", "sqlite:////tmp/vimrace.db"
@@ -21,6 +24,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = getenv(
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
 db.create_all(app=app)
+limiter = Limiter(app, key_func=get_remote_address)
 
 total_challenges = 0
 CHALLENGE_PATH = "challenges"
@@ -140,6 +144,7 @@ def get_score_from_raw_keys(raw_keys):
 
 
 @app.route("/submit/<int:challenge_id>", methods=["POST"])
+@limiter.limit("1 per minute")
 @validate_challenge_id
 def submit(challenge_id):
     name, email, username = get_name_email_username(request)
@@ -226,6 +231,7 @@ def homepage():
 
 
 @app.route("/challenges")
+@limiter.limit("5 per minute")
 @setup_gui_route
 def view():
     name, email, username = get_name_email_username(request)
@@ -249,6 +255,7 @@ def send_list():
 
 
 @app.route("/challenges_leaderboard/<int:challenge_id>.json")
+@limiter.limit("5 per minute")
 @validate_challenge_id
 def get_leaderboard(challenge_id):
     return json.dumps(get_challenge_leaderboard_data(challenge_id))
@@ -309,6 +316,7 @@ def get_global_leaderboard_data(specific_alias=None):
 
 
 @app.route("/leaderboard")
+@limiter.limit("5 per minute")
 @setup_gui_route
 def leaderboard():
     cha_ids = list(range(total_challenges))
