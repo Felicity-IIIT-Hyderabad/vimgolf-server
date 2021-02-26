@@ -174,7 +174,8 @@ def submit(challenge_id):
     exists = Score.query.filter(
         Score.useremail == email and Score.challenge_code == challenge_id
     ).first()
-    print(exists, exists.keystrokes, challenge_id, email)
+    with open("x", "w") as f:
+        f.write(f"{exists}, {exists.keystrokes}, {challenge_id}, {email}")
 
     if exists:
         if exists.keystrokes <= score_value:
@@ -276,9 +277,10 @@ def get_challenge_leaderboard_data(challenge_code):
 
 def get_best_score(challenge_id, alias=None):
     if alias:
-        print("!", alias, challenge_id)
-        res = Score.query.filter(Score.challenge_code == challenge_id and Score.useralias == alias).first()
-        print("!", res, res.keystrokes)
+        with open("y", "w") as f:
+            f.write(f"{alias} {challenge_id}")
+            res = Score.query.filter(Score.challenge_code == challenge_id and Score.useralias == alias).first()
+            f.write(f"{alias} {challenge_id}")
         if res:
             return res.keystrokes
         else:
