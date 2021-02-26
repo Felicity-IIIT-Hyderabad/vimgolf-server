@@ -213,7 +213,7 @@ def before_request():
 @app.route("/404")
 @setup_gui_route
 def give_error():
-    return "404.html"
+    return "404.html", {}
 
 
 app.register_error_handler(404, give_error)
@@ -223,7 +223,7 @@ app.register_error_handler(404, give_error)
 @app.route("/")
 @setup_gui_route
 def homepage():
-    return "rules.html"
+    return "rules.html", {}
 
 
 @app.route("/challenges")
