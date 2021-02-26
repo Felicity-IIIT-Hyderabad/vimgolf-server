@@ -235,6 +235,12 @@ def homepage():
     return "rules.html", {"title": "Home for IIITH VimGolf'21"}
 
 
+@app.route("/build")
+@setup_gui_route
+def show_build():
+    return "build.html", {"title": "Build information for Vim"}
+
+
 # @app.route("/challenges")
 @limiter.limit("10 per minute")
 @setup_gui_route
