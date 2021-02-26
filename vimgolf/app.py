@@ -109,7 +109,7 @@ def challenge(challenge_id):
         "intxt": data["in"],
         "out": data["out"],
         "title": data["title"],
-        "desc": data["desc"],
+        "desc": data["desc"].replace("\n", "<br>"),
     }
 
 
