@@ -183,10 +183,10 @@ def submit(challenge_id):
     exists = Score.query.filter(
         Score.useremail == email and Score.challenge_code == challenge_id
     ).first()
-    with open("x", "a") as f:
-        f.write(f"{exists}, {exists.keystrokes}, {challenge_id}, {email}\n")
 
     if exists:
+        with open("x", "a") as f:
+            f.write(f"{exists}, {exists.keystrokes}, {challenge_id}, {email}\n")
         if exists.keystrokes <= score_value:
             # content not modified
             return "Same or better score already exists", 304
