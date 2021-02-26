@@ -219,7 +219,7 @@ def give_error():
     return "404.html", {}
 
 
-app.register_error_handler(404, give_error)
+# app.register_error_handler(404, give_error)
 
 
 @app.route("/home")
