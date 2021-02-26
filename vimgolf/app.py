@@ -60,7 +60,7 @@ def healthcheck():
 
 def is_valid_challenge_id(challenge_id):
     return challenge_id is not None and (
-        int(challenge_id) < total_challenges or int(challenge_id) >= 0
+            int(challenge_id) < total_challenges or int(challenge_id) >= 0
     )
 
 
@@ -112,7 +112,7 @@ def challenge(challenge_id):
 @app.route("/challenges/<int:challenge_id>.json")
 @validate_challenge_id
 def challenge_two(challenge_id):
-    return CHALLENGE_DATA[challenge_id]
+    return json.dumps(CHALLENGE_DATA[challenge_id])
 
 
 def test_keystrokes(challenge_id, keystrokestring):
