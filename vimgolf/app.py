@@ -7,7 +7,7 @@ from operator import itemgetter
 from os import getenv, listdir
 from tempfile import mkdtemp
 
-from flask import Flask, abort, render_template, request
+from flask import Flask, abort, render_template, request, url_for, redirect
 
 from vimgolf.keys import IGNORED_KEYSTROKES, parse_keycodes
 from vimgolf.models.models import Score
@@ -60,7 +60,7 @@ def healthcheck():
 
 def is_valid_challenge_id(challenge_id):
     return challenge_id is not None and (
-        int(challenge_id) < total_challenges or int(challenge_id) >= 0
+            int(challenge_id) < total_challenges or int(challenge_id) >= 0
     )
 
 
@@ -77,7 +77,7 @@ def validate_challenge_id(func):
 def get_name_email_username(req):
     heads = req.headers
     return (
-        heads["x-fname"] + heads["x-lname"],
+        heads["x-fname"] + " " + heads["x-lname"],
         heads["x-email"],
         heads["x-username"],
     )
@@ -139,11 +139,6 @@ def get_score_from_raw_keys(raw_keys):
     return score
 
 
-# TODO:
-# instead of keystrokestring, upload the vim -s file as a file to the server
-# give yoogottam a temporary directory containing the submitted file
-# he will pick up in and out from challenges directory
-# yoogottam will give me a partial score (how many files gave `diff -w` exit code zero)
 @app.route("/submit/<int:challenge_id>", methods=["POST"])
 @validate_challenge_id
 def submit(challenge_id):
@@ -190,8 +185,48 @@ def submit(challenge_id):
     return "Sucess", 200
 
 
+GOD_MODE = ["gaurang.tandon@students.iiit.ac.in", "yoogottam.khandelwal@students.iiit.ac.in",
+            "kunwar.shaanjeet@students.iiit.ac.in"]
+
+
+@app.before_request
+def before_request():
+    name, email, username = get_name_email_username(request)
+
+    if email in GOD_MODE:
+        return None
+
+    if request.path == "home" or request.path == "/":
+        return None
+
+    is_iiith = request.headers["x-iiith"]
+    if int(is_iiith) != 1:
+        return redirect(url_for('404'))
+
+    curr_time = datetime.datetime.now()
+    start_time = datetime.datetime(2021, 1, 25, 12, 00, 00)
+
+    if curr_time < start_time:
+        return redirect(url_for("404"))
+
+
+@app.route("/404")
+@setup_gui_route
+def give_error():
+    return "404.html"
+
+
+app.register_error_handler(404, give_error)
+
+
+@app.route("/home")
 @app.route("/")
-@app.route("/view")
+@setup_gui_route
+def homepage():
+    return "rules.html"
+
+
+@app.route("/challenges")
 @setup_gui_route
 def view():
     name, email, username = get_name_email_username(request)
