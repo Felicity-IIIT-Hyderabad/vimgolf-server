@@ -127,6 +127,8 @@ def test_keystrokes(challenge_id, keystrokestring):
 
     (corr, wrong), logs = get_scores(d, tmpdir)
 
+    print(logs)
+
     return corr > 0
 
 
