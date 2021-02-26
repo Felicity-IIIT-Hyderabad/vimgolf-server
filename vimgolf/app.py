@@ -127,9 +127,7 @@ def test_keystrokes(challenge_id, keystrokestring):
 
     (corr, wrong), logs = get_scores(d, tmpdir)
 
-    print(logs)
-
-    return corr > 0
+    return corr > 0, logs
 
 
 def get_score_from_raw_keys(raw_keys):
@@ -157,10 +155,10 @@ def submit(challenge_id):
     if not raw_keys:
         return "No raw keys supplied", 403
 
-    result = test_keystrokes(challenge_id, raw_keys)
+    result, logs = test_keystrokes(challenge_id, raw_keys)
 
     if not result:
-        return "Invalid keystroke for given challenge id", 403
+        return f"Invalid keystroke for given challenge id\n{logs}", 403
 
     score_value = get_score_from_raw_keys(raw_keys)
     exists = Score.query.filter(
