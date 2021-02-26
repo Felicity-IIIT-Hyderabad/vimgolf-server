@@ -10,11 +10,9 @@
 <ol>
     {% for cha in challenges %}
     <li>
-        Challenge <a href="/challenges/{{cha.id}}">"{{cha.name}}"</a><br>
+        Challenge <a href="/vimgolf/challenges/{{cha.id}}">"{{cha.name}}"</a><br>
         <ul>
-            {% if logged_in %}
-                <li>Your score: {{cha.my}}</li>
-            {% endif %}
+            <li>Your score: {{cha.my}}</li>
             <li>Best score: {{cha.best}}</li>
         </ul>
     </li>
