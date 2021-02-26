@@ -150,7 +150,7 @@ def get_score_from_raw_keys(raw_keys):
 @limiter.limit("1 per minute")
 @validate_challenge_id
 def submit(challenge_id):
-    with open("x", "wa") as f:
+    with open("x", "a") as f:
         f.write(f"!{challenge_id}\n")
 
     name, email, username = get_name_email_username(request)
@@ -158,7 +158,7 @@ def submit(challenge_id):
     # this shouldn't really happen
     assert name is not None
 
-    with open("x", "wa") as f:
+    with open("x", "a") as f:
         f.write(f"!{challenge_id}\n")
 
     if "entry" not in request.form:
@@ -166,14 +166,14 @@ def submit(challenge_id):
 
     raw_keys = request.form["entry"].encode("utf-8")
 
-    with open("x", "wa") as f:
+    with open("x", "a") as f:
         f.write(f"!{challenge_id}\n")
 
     if not raw_keys:
         return "No raw keys supplied", 403
 
     result, logs = test_keystrokes(challenge_id, raw_keys)
-    with open("x", "wa") as f:
+    with open("x", "a") as f:
         f.write(f"!{challenge_id}\n")
 
     if not result:
@@ -183,7 +183,7 @@ def submit(challenge_id):
     exists = Score.query.filter(
         Score.useremail == email and Score.challenge_code == challenge_id
     ).first()
-    with open("x", "wa") as f:
+    with open("x", "a") as f:
         f.write(f"{exists}, {exists.keystrokes}, {challenge_id}, {email}\n")
 
     if exists:
@@ -286,7 +286,7 @@ def get_challenge_leaderboard_data(challenge_code):
 
 def get_best_score(challenge_id, alias=None):
     if alias:
-        with open("y", "wa") as f:
+        with open("y", "a") as f:
             f.write(f"!{alias} {challenge_id}\n")
             res = Score.query.filter(Score.challenge_code == challenge_id and Score.useralias == alias).first()
             f.write(f"!{alias} {challenge_id}\n")
