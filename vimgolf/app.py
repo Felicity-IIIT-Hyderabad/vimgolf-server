@@ -271,14 +271,24 @@ def get_challenge_leaderboard_data(challenge_code):
 
 def get_best_score(challenge_id, alias=None):
     if alias:
-        res = Score.query.filter(Score.challenge_code == challenge_id and Score.useralias == alias).all()
-    else:
-        res = Score.query.filter(Score.challenge_code == challenge_id).all()
+        res = Score.query.filter(Score.challenge_code == challenge_id and Score.useralias == alias).first()
+        if res:
+            return res.keystrokes
+        else:
+            return -1
 
-    if res:
-        return res.first().keystrokes
-    else:
-        return -1
+    res = Score.query.filter(Score.challenge_code == challenge_id).all()
+
+    INF = int(1e10)
+    least_keystrokes = INF
+
+    for x in res:
+        least_keystrokes = min(x.keystrokes, least_keystrokes)
+
+    if least_keystrokes == INF:
+        least_keystrokes = -1
+
+    return least_keystrokes
 
 
 def get_global_leaderboard_data(specific_alias=None):
