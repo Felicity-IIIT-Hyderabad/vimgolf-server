@@ -213,13 +213,9 @@ def before_request():
         return redirect(url_for("give_error"))
 
 
-@app.route("/not_found")
-@setup_gui_route
+@app.errorhandler(404)
 def give_error():
-    return "404.html", {}
-
-
-# app.register_error_handler(404, give_error)
+    return render_template("404.html")
 
 
 @app.route("/home")
