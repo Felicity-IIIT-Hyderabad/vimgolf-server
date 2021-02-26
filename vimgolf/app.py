@@ -204,13 +204,13 @@ def before_request():
 
     is_iiith = request.headers.get("x-iiith", "1")
     if int(is_iiith) != 1:
-        return redirect(url_for("give_error"))
+        return redirect(url_for("home"))
 
     curr_time = datetime.datetime.now()
     start_time = datetime.datetime(2021, 1, 25, 12, 00, 00)
 
     if curr_time < start_time:
-        return redirect(url_for("give_error"))
+        return redirect(url_for("home"))
 
 
 @app.errorhandler(404)
