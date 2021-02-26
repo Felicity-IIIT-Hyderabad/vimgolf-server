@@ -9,13 +9,9 @@
 
 <ol>
     {% for cha in challenges %}
-    <li>
-        Challenge <a href="/vimgolf/challenges/{{cha.id}}">"{{cha.name}}"</a><br>
-        <ul>
-            <li>Your score: {{cha.my}}</li>
-            <li>Best score: {{cha.best}}</li>
-        </ul>
-    </li>
+    <h2> <a href="/vimgolf/challenges/{{cha.id}}">"{{cha.name}}"</a></h2>
+    <p>Your score: {{cha.my}}</p>
+    <p>Best score: {{cha.best}}</p>
     {% endfor %}
 </ol>
 
