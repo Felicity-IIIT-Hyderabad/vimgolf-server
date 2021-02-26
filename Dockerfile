@@ -2,6 +2,9 @@ FROM python:3.8-slim
 
 WORKDIR /opt
 
+ENV TZ=Asia/Kolkata
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 RUN apt update && \
     apt install -y gcc && \
     rm -rf /var/lib/apt/lists
