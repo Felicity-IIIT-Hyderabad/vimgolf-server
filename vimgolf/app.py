@@ -37,6 +37,7 @@ d = docker_init()
 def init_setup():
     global total_challenges
     challenge_files = listdir(CHALLENGE_PATH)
+    total_challenges = len(challenge_files)
 
     for challenge_idx, _idx in enumerate(challenge_files):
         data = {}
@@ -163,7 +164,7 @@ def submit(challenge_id):
     result, logs = test_keystrokes(challenge_id, raw_keys)
 
     if not result:
-        return f"Invalid keystroke for given challenge id\n{logs}", 403
+        return f"Invalid keystroke for given challenge id\n", 403
 
     score_value = get_score_from_raw_keys(raw_keys)
     exists = Score.query.filter(
