@@ -44,7 +44,6 @@ def init_setup():
         PREF = f"{CHALLENGE_PATH}/{challenge_idx}"
 
         file_names = listdir(PREF)
-        assert len(file_names) % NUM_FILES_PER_CHALLENGE == 0
 
         with open(f"{PREF}/0.in") as f:
             data["in"] = f.read()
