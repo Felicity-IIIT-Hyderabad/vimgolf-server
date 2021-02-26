@@ -7,7 +7,7 @@ from operator import itemgetter
 from os import getenv, listdir
 from tempfile import mkdtemp
 
-from flask import Flask, abort, render_template, request, url_for, redirect
+from flask import Flask, render_template, request, url_for, redirect
 
 from vimgolf.keys import IGNORED_KEYSTROKES, parse_keycodes
 from vimgolf.models.models import Score
@@ -60,7 +60,7 @@ def healthcheck():
 
 def is_valid_challenge_id(challenge_id):
     return challenge_id is not None and (
-            int(challenge_id) < total_challenges or int(challenge_id) >= 0
+        int(challenge_id) < total_challenges or int(challenge_id) >= 0
     )
 
 
@@ -185,8 +185,11 @@ def submit(challenge_id):
     return "Sucess", 200
 
 
-GOD_MODE = ["gaurang.tandon@students.iiit.ac.in", "yoogottam.khandelwal@students.iiit.ac.in",
-            "kunwar.shaanjeet@students.iiit.ac.in"]
+GOD_MODE = [
+    "gaurang.tandon@students.iiit.ac.in",
+    "yoogottam.khandelwal@students.iiit.ac.in",
+    "kunwar.shaanjeet@students.iiit.ac.in",
+]
 
 
 @app.before_request
@@ -201,13 +204,13 @@ def before_request():
 
     is_iiith = request.headers["x-iiith"]
     if int(is_iiith) != 1:
-        return redirect(url_for('404'))
+        return redirect(url_for("give_error"))
 
     curr_time = datetime.datetime.now()
     start_time = datetime.datetime(2021, 1, 25, 12, 00, 00)
 
     if curr_time < start_time:
-        return redirect(url_for("404"))
+        return redirect(url_for("give_error"))
 
 
 @app.route("/404")
