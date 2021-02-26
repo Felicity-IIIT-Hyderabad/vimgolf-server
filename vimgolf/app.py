@@ -18,6 +18,8 @@ from vimgolf.utils import docker_init, get_scores
 from flask_limiter import Limiter
 from flask_limiter.util import get_ipaddr
 
+from base64 import b64decode
+
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = getenv(
     "SQLALCHEMY_DATABASE_URI", "sqlite:////tmp/vimrace.db"
@@ -158,7 +160,7 @@ def submit(challenge_id):
     if "entry" not in request.form:
         return "Provide entry", 403
 
-    raw_keys = request.form["entry"].encode("utf-8")
+    raw_keys = b64decode(request.form["entry"])
 
     if not raw_keys:
         return "No raw keys supplied", 403
