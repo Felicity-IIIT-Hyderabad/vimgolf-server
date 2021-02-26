@@ -50,7 +50,7 @@ def init_setup():
             data["in"] = f.read()
         with open(f"{PREF}/0.out") as f:
             data["out"] = f.read()
-        with open(f"{PREF}/0.desc") as f:
+        with open(f"{PREF}/desc") as f:
             lines = f.readlines()
             data["title"] = lines[0].strip()
             data["desc"] = "\n".join(lines[1:]).strip()
