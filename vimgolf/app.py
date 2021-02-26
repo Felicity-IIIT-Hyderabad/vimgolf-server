@@ -214,7 +214,7 @@ def before_request():
 
 
 @app.errorhandler(404)
-def give_error():
+def give_error(_):
     return render_template("404.html")
 
 
