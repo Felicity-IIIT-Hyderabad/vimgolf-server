@@ -228,7 +228,7 @@ def give_error(_):
 @app.route("/")
 @setup_gui_route
 def homepage():
-    return "rules.html", {}
+    return "rules.html", {"title": "Home for IIITH VimGolf'21"}
 
 
 @app.route("/challenges")
@@ -335,7 +335,7 @@ def apikey():
     authorization_key = "authorization"
     token = request.headers[authorization_key]
 
-    return "apikey.html", {"apikey": token}
+    return "apikey.html", {"apikey": token, "title": "Private apikey"}
 
 
 init_setup()
