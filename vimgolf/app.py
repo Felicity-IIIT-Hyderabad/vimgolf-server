@@ -273,9 +273,9 @@ def get_challenge_leaderboard_data(challenge_code):
 
 def get_best_score(challenge_id, alias=None):
     if alias:
-        res = Score.query.filter(Score.challenge_code == challenge_id, Score.useralias == alias).all()
+        res = Score.query.filter(Score.challenge_code == challenge_id, Score.useralias == alias).first()
         if res:
-            return res[0].keystrokes
+            return res.keystrokes
         else:
             return -1
 
