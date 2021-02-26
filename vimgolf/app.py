@@ -232,15 +232,16 @@ def homepage():
 
 
 @app.route("/challenges")
-@limiter.limit("5 per minute")
+@limiter.limit("10 per minute")
 @setup_gui_route
 def view():
     name, email, username = get_name_email_username(request)
-    global_rank, _scores = get_global_leaderboard_data(username)
+    global_rank, _ = get_global_leaderboard_data(username)
     challenges = []
 
     for challenge_id, c_data in CHALLENGE_DATA.items():
-        data = {"name": c_data["title"], "id": challenge_id, "best": 100}
+        data = {"name": c_data["title"], "id": challenge_id,
+                "my": get_best_score(challenge_id, username), "best": get_best_score(challenge_id)}
         challenges.append(data)
 
     return "challenge_list.html", {
@@ -256,7 +257,7 @@ def send_list():
 
 
 @app.route("/challenges_leaderboard/<int:challenge_id>.json")
-@limiter.limit("5 per minute")
+@limiter.limit("10 per minute")
 @validate_challenge_id
 def get_leaderboard(challenge_id):
     return json.dumps(get_challenge_leaderboard_data(challenge_id))
@@ -266,6 +267,18 @@ def get_challenge_leaderboard_data(challenge_code):
     scores = Score.query.filter(Score.challenge_code == challenge_code).all()
     scores = sorted(scores, key=lambda score: score.keystrokes)
     return [{"alias": score.useralias, "score": score.keystrokes} for score in scores]
+
+
+def get_best_score(challenge_id, alias=None):
+    if alias:
+        res = Score.query.filter(Score.challenge_code == challenge_id and Score.useralias == alias).all()
+    else:
+        res = Score.query.filter(Score.challenge_code == challenge_id).all()
+
+    if res:
+        return res.first().keystrokes
+    else:
+        return -1
 
 
 def get_global_leaderboard_data(specific_alias=None):
@@ -317,7 +330,7 @@ def get_global_leaderboard_data(specific_alias=None):
 
 
 @app.route("/leaderboard")
-@limiter.limit("5 per minute")
+@limiter.limit("10 per minute")
 @setup_gui_route
 def leaderboard():
     cha_ids = list(range(total_challenges))
