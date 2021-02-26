@@ -23,7 +23,7 @@ db.init_app(app)
 db.create_all(app=app)
 
 total_challenges = 0
-CHALLENGE_PATH = "challenges/"
+CHALLENGE_PATH = "challenges"
 NUM_FILES_PER_CHALLENGE = 3  # in, out, desc
 CHALLENGE_DATA = {}
 
@@ -77,9 +77,9 @@ def validate_challenge_id(func):
 def get_name_email_username(req):
     heads = req.headers
     return (
-        heads["x-fname"] + " " + heads["x-lname"],
-        heads["x-email"],
-        heads["x-username"],
+        heads.get("x-fname", "yay") + " " + heads.get("x-lname", "boo"),
+        heads.get("x-email", "yay@boo"),
+        heads.get("x-username", "yay.boo"),
     )
 
 
@@ -202,7 +202,7 @@ def before_request():
     if request.path == "home" or request.path == "/":
         return None
 
-    is_iiith = request.headers["x-iiith"]
+    is_iiith = request.headers.get("x-iiith", "1")
     if int(is_iiith) != 1:
         return redirect(url_for("give_error"))
 
