@@ -6,6 +6,7 @@ from collections import defaultdict
 from operator import itemgetter
 from os import getenv, listdir
 from tempfile import mkdtemp
+import re
 
 from flask import Flask, render_template, request, url_for, redirect
 
@@ -105,11 +106,15 @@ def setup_gui_route(func):
 def challenge(challenge_id):
     data = CHALLENGE_DATA[challenge_id]
 
+    desc_parsed = data["desc"].replace("\n", "<br>")
+    # desc_parsed = re.sub("(<br>){3,}", "<br><br>", desc_parsed)
+    desc_parsed = re.sub("(<br>)+", "<br>", desc_parsed)
+
     return "challenge.html", {
         "intxt": data["in"],
         "out": data["out"],
         "title": data["title"],
-        "desc": data["desc"].replace("\n", "<br>"),
+        "desc": desc_parsed
     }
 
 
