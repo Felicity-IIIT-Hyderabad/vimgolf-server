@@ -136,7 +136,7 @@ def test_keystrokes(challenge_id, keystrokestring):
 
     (corr, wrong), logs = get_scores(d, tmpdir)
 
-    return corr > 0, logs
+    return wrong == 0, logs
 
 
 def get_score_from_raw_keys(raw_keys):
