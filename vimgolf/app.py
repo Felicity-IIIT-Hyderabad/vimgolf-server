@@ -65,7 +65,7 @@ def healthcheck():
 
 def is_valid_challenge_id(challenge_id):
     return challenge_id is not None and (
-            int(challenge_id) < total_challenges or int(challenge_id) >= 0
+        int(challenge_id) < total_challenges or int(challenge_id) >= 0
     )
 
 
@@ -114,7 +114,7 @@ def challenge(challenge_id):
         "intxt": data["in"],
         "out": data["out"],
         "title": data["title"],
-        "desc": desc_parsed
+        "desc": desc_parsed,
     }
 
 
@@ -217,7 +217,7 @@ def before_request():
         return redirect(url_for("homepage"))
 
     curr_time = datetime.datetime.now()
-    start_time = datetime.datetime(2021, 1, 25, 12, 00, 00)
+    start_time = datetime.datetime(2021, 2, 27, 12, 00, 00)
 
     if curr_time < start_time:
         return redirect(url_for("homepage"))
@@ -241,7 +241,7 @@ def show_build():
     return "build.html", {"title": "Build information for Vim"}
 
 
-# @app.route("/challenges")
+@app.route("/challenges")
 @limiter.limit("10 per minute")
 @setup_gui_route
 def view():
@@ -250,8 +250,12 @@ def view():
     challenges = []
 
     for challenge_id, c_data in CHALLENGE_DATA.items():
-        data = {"name": c_data["title"], "id": challenge_id,
-                "my": get_best_score(challenge_id, username), "best": get_best_score(challenge_id)}
+        data = {
+            "name": c_data["title"],
+            "id": challenge_id,
+            "my": get_best_score(challenge_id, username),
+            "best": get_best_score(challenge_id),
+        }
         challenges.append(data)
 
     return "challenge_list.html", {
@@ -261,12 +265,12 @@ def view():
     }
 
 
-# @app.route("/list")
+@app.route("/list")
 def send_list():
     return CHALLENGE_DATA
 
 
-# @app.route("/challenges_leaderboard/<int:challenge_id>.json")
+@app.route("/challenges_leaderboard/<int:challenge_id>.json")
 @limiter.limit("10 per minute")
 @validate_challenge_id
 def get_leaderboard(challenge_id):
@@ -281,7 +285,9 @@ def get_challenge_leaderboard_data(challenge_code):
 
 def get_best_score(challenge_id, alias=None):
     if alias:
-        res = Score.query.filter(Score.challenge_code == challenge_id, Score.useralias == alias).first()
+        res = Score.query.filter(
+            Score.challenge_code == challenge_id, Score.useralias == alias
+        ).first()
         if res:
             return res.keystrokes
         else:
@@ -349,7 +355,7 @@ def get_global_leaderboard_data(specific_alias=None):
     return leaders
 
 
-# @app.route("/leaderboard")
+@app.route("/leaderboard")
 @limiter.limit("10 per minute")
 @setup_gui_route
 def leaderboard():
@@ -362,7 +368,7 @@ def leaderboard():
     }
 
 
-# @app.route("/apikey")
+@app.route("/apikey")
 @setup_gui_route
 def apikey():
     authorization_key = "authorization"
