@@ -168,7 +168,7 @@ def submit(challenge_id):
     result, logs = test_keystrokes(challenge_id, raw_keys)
 
     if not result:
-        return f"Invalid keystroke for given challenge id\n", 403
+        return f"Your keystrokes did not run correctly on all our testcases", 403
 
     score_value = get_score_from_raw_keys(raw_keys)
     exists = Score.query.filter(
@@ -217,7 +217,7 @@ def before_request():
         return redirect(url_for("homepage"))
 
     curr_time = datetime.datetime.now()
-    start_time = datetime.datetime(2021, 2, 27, 12, 00, 00)
+    start_time = datetime.datetime(2021, 2, 27, 12, 15, 00)
 
     if curr_time < start_time:
         return redirect(url_for("homepage"))
