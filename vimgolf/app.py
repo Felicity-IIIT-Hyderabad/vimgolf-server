@@ -100,7 +100,7 @@ def setup_gui_route(func):
     return wrapper
 
 
-# @app.route("/challenges/<int:challenge_id>")
+@app.route("/challenges/<int:challenge_id>")
 @validate_challenge_id
 @setup_gui_route
 def challenge(challenge_id):
@@ -118,7 +118,7 @@ def challenge(challenge_id):
     }
 
 
-# @app.route("/challenges/<int:challenge_id>.json")
+@app.route("/challenges/<int:challenge_id>.json")
 @validate_challenge_id
 def challenge_two(challenge_id):
     return json.dumps(CHALLENGE_DATA[challenge_id])
@@ -148,7 +148,7 @@ def get_score_from_raw_keys(raw_keys):
     return score
 
 
-# @app.route("/submit/<int:challenge_id>", methods=["POST"])
+@app.route("/submit/<int:challenge_id>", methods=["POST"])
 @limiter.limit("1 per minute")
 @validate_challenge_id
 def submit(challenge_id):
