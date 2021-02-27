@@ -124,10 +124,10 @@ def challenge_two(challenge_id):
     return json.dumps(CHALLENGE_DATA[challenge_id])
 
 
-def test_keystrokes(challenge_id, keystrokestring):
+def test_keystrokes(challenge_id, keystrokestring, username):
     global d
 
-    tmpdir = mkdtemp()
+    tmpdir = mkdtemp(f"-{username}-{challenge_id}")
     challenge_dir = f"{CHALLENGE_PATH}/{challenge_id}"
     copy_tree(challenge_dir, tmpdir)
 
@@ -165,7 +165,7 @@ def submit(challenge_id):
     if not raw_keys:
         return "No raw keys supplied", 403
 
-    result, logs = test_keystrokes(challenge_id, raw_keys)
+    result, logs = test_keystrokes(challenge_id, raw_keys, username)
 
     if not result:
         return f"Your keystrokes did not run correctly on all our testcases", 403
