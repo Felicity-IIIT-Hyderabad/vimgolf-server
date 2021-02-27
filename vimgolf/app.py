@@ -217,7 +217,7 @@ def before_request():
         return redirect(url_for("homepage"))
 
     curr_time = datetime.datetime.now()
-    start_time = datetime.datetime(2021, 2, 27, 12, 00, 00)
+    start_time = datetime.datetime(2021, 2, 27, 12, 15, 00)
 
     if curr_time < start_time:
         return redirect(url_for("homepage"))
