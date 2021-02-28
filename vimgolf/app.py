@@ -148,9 +148,9 @@ def get_score_from_raw_keys(raw_keys):
     return score
 
 
-@app.route("/submit/<int:challenge_id>", methods=["POST"])
-@limiter.limit("1 per minute")
-@validate_challenge_id
+# @app.route("/submit/<int:challenge_id>", methods=["POST"])
+# @limiter.limit("1 per minute")
+# @validate_challenge_id
 def submit(challenge_id):
     name, email, username = get_name_email_username(request)
 
