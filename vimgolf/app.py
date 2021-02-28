@@ -65,7 +65,7 @@ def healthcheck():
 
 def is_valid_challenge_id(challenge_id):
     return challenge_id is not None and (
-        int(challenge_id) < total_challenges or int(challenge_id) >= 0
+            int(challenge_id) < total_challenges or int(challenge_id) >= 0
     )
 
 
@@ -148,9 +148,9 @@ def get_score_from_raw_keys(raw_keys):
     return score
 
 
-# @app.route("/submit/<int:challenge_id>", methods=["POST"])
-# @limiter.limit("1 per minute")
-# @validate_challenge_id
+@app.route("/submit/<int:challenge_id>", methods=["POST"])
+@limiter.limit("1 per minute")
+@validate_challenge_id
 def submit(challenge_id):
     name, email, username = get_name_email_username(request)
 
@@ -366,6 +366,12 @@ def leaderboard():
         "title": "Global leaderboard",
         "cha_ids": cha_ids,
     }
+
+
+@app.route("/leaderboard-static")
+@setup_gui_route
+def leaderboard_static():
+    return "leaderboard-static.html", {}
 
 
 @app.route("/apikey")
