@@ -168,7 +168,7 @@ def submit(challenge_id):
     result, logs = test_keystrokes(challenge_id, raw_keys, username)
 
     if not result:
-        return f"Your keystrokes did not run correctly on all our testcases", 403
+        return f"Your keystrokes did not run correctly on all our testcases\n" + logs, 403
 
     score_value = get_score_from_raw_keys(raw_keys)
     exists = Score.query.filter(
