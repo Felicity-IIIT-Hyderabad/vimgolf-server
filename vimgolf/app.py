@@ -212,10 +212,6 @@ def before_request():
     if request.path == "home" or request.path == "/":
         return None
 
-    is_iiith = request.headers.get("x-iiith", "1")
-    if int(is_iiith) != 1:
-        return redirect(url_for("homepage"))
-
     curr_time = datetime.datetime.now()
     start_time = datetime.datetime(2021, 2, 27, 12, 15, 00)
 
